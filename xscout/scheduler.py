@@ -28,10 +28,15 @@ class XScoutScheduler:
 
     def scan(self):
         print(f"\n[Scheduler] Starting scan at {time.strftime('%Y-%m-%d %H:%M:%S')}")
-        
+        blocked_providers = set()
+
         for keyword in self.keywords:
             print(f"  > Scanning for keyword: '{keyword}'")
             for provider in self.providers:
+                # Skip if this provider already hit a rate limit in this cycle
+                if provider in blocked_providers:
+                    continue
+
                 # Add delay to respect rate limits (especially Twitter)
                 time.sleep(5) 
                 
@@ -42,9 +47,9 @@ class XScoutScheduler:
                     error_msg = str(e)
                     
                     if "429" in error_msg or "Too Many Requests" in error_msg:
-                        print(f"    [!] Rate Limit hit for {provider.__class__.__name__}. Pausing for 15 minutes to reset window...")
-                        db_manager.log("WARNING", f"Rate limit hit for {provider.__class__.__name__}")
-                        time.sleep(900) # Wait 15 minutes for window reset
+                        print(f"    [!] Rate Limit hit for {provider.__class__.__name__}. Skipping rest of scan for this provider.")
+                        db_manager.log("WARNING", f"Rate limit hit for {provider.__class__.__name__} - Skipping rest of cycle")
+                        blocked_providers.add(provider)
                     else:
                         print(f"    ! Error scanning {provider.__class__.__name__}: {error_msg}")
                         db_manager.log("ERROR", f"Scan error on {provider.__class__.__name__}: {error_msg}") 
