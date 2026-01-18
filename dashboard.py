@@ -148,8 +148,8 @@ def render_feed():
                                 <button class="text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-lg">share</span></button>
                                 <button class="text-slate-500 hover:text-red-500"><span class="material-symbols-outlined text-lg">block</span></button>
                             </div>
-                            <a href="{row['profile_url']}" target="_blank" class="flex min-w-[100px] items-center justify-center rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md active:scale-95 transition-transform">
-                                View Profile
+                            <a href="?view=details&id={row.get('post_id')}" target="_self" class="flex min-w-[100px] items-center justify-center rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md active:scale-95 transition-transform no-underline">
+                                View Details
                             </a>
                         </div>
                     </div>
