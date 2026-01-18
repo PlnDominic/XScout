@@ -6,3 +6,4 @@ linkedin-api
 spacy
 streamlit
 pandas
+supabase

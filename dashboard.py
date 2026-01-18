@@ -15,31 +15,34 @@ st.set_page_config(
 )
 
 # Database Connection
-DB_PATH = "xscout/xscout.db"
-
-def get_connection():
-    return sqlite3.connect(DB_PATH)
+from xscout.database.manager import db_manager
 
 def load_leads():
-    if not os.path.exists(DB_PATH):
+    if not db_manager.client:
         return pd.DataFrame()
     
-    conn = get_connection()
     try:
-        # Load leads and sort by newest
-        df = pd.read_sql("SELECT * FROM leads ORDER BY detected_at DESC", conn)
+        # Fetch leads from Supabase
+        response = db_manager.client.table("leads").select("*").order("detected_at", desc=True).execute()
+        data = response.data
+        if not data:
+            return pd.DataFrame()
+            
+        df = pd.DataFrame(data)
         return df
-    finally:
-        conn.close()
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return pd.DataFrame()
 
 # UI Layout
-st.title("🚀 XScout Agent")
+st.title("🚀 XScout Agent (Cloud)")
 
-if not os.path.exists(DB_PATH):
-    st.warning("⚠️ Database not found. The agent might not have run yet.")
+if not db_manager.client:
+    st.error("⚠️ Supabase credentials not found. Check deployment variables.")
 else:
     # Stats
     df = load_leads()
+
     if not df.empty:
         col1, col2, col3 = st.columns(3)
         col1.metric("Total Leads", len(df))

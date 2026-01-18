@@ -1,103 +1,65 @@
-import sqlite3
-import datetime
 import os
+import datetime
+from xscout.config.loader import config
+from supabase import create_client, Client
 
 class DatabaseManager:
-    def __init__(self, db_path="xscout/xscout.db"):
-        self.db_path = db_path
-        self._initialize_db()
-
-    def _get_connection(self):
-        return sqlite3.connect(self.db_path)
-
-    def _initialize_db(self):
-        # Create DB file if it doesn't exist
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+    def __init__(self):
+        url = config.get("supabase.url")
+        key = config.get("supabase.key")
         
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        
-        # Leads Table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS leads (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                platform TEXT NOT NULL,
-                username TEXT,
-                profile_url TEXT,
-                post_text TEXT NOT NULL,
-                post_id TEXT UNIQUE NOT NULL,
-                matched_keyword TEXT,
-                intent_score INTEGER,
-                intent_label TEXT,
-                contact_info TEXT,
-                detected_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                notified BOOLEAN DEFAULT 0
-            )
-        ''')
+        if not url or not key:
+             # Fallback or error, but for now we assume they are set
+             print("! Warning: Supabase credentials missing.")
+             self.client = None
+             return
 
-        # Logs Table
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                level TEXT,
-                message TEXT
-            )
-        ''')
-        
-        conn.commit()
-        conn.close()
+        self.client: Client = create_client(url, key)
 
     def add_lead(self, lead_data):
-        """
-        lead_data: dict containing platform, username, profile_url, post_text, post_id, matched_keyword, intent_score
-        """
-        conn = self._get_connection()
-        cursor = conn.cursor()
+        if not self.client: return
+        
+        data = {
+            "platform": lead_data.get('platform'),
+            "username": lead_data.get('username'),
+            "profile_url": lead_data.get('profile_url'),
+            "post_text": lead_data.get('post_text'),
+            "post_id": lead_data.get('post_id'),
+            "matched_keyword": lead_data.get('matched_keyword'),
+            "intent_score": lead_data.get('intent_score'),
+            "intent_label": lead_data.get('intent_label'),
+            "contact_info": lead_data.get('contact_info'),
+            "notified": False
+        }
+        
         try:
-            cursor.execute('''
-                INSERT INTO leads (platform, username, profile_url, post_text, post_id, matched_keyword, intent_score, intent_label, contact_info)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                lead_data.get('platform'),
-                lead_data.get('username'),
-                lead_data.get('profile_url'),
-                lead_data.get('post_text'),
-                lead_data.get('post_id'),
-                lead_data.get('matched_keyword'),
-                lead_data.get('intent_score'),
-                lead_data.get('intent_label'),
-                lead_data.get('contact_info')
-            ))
-            conn.commit()
-            return True
-        except sqlite3.IntegrityError:
-            # Duplicate entry
-            return False
-        finally:
-            conn.close()
+            self.client.table("leads").insert(data).execute()
+            print(f"    + Saved to Supabase: {lead_data.get('profile_url')}")
+        except Exception as e:
+            print(f"    ! Supabase Insert Error: {e}")
 
     def lead_exists(self, post_id):
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute('SELECT 1 FROM leads WHERE post_id = ?', (post_id,))
-        result = cursor.fetchone()
-        conn.close()
-        return result is not None
+        if not self.client: return False
+        try:
+            response = self.client.table("leads").select("*").eq("post_id", post_id).execute()
+            return len(response.data) > 0
+        except Exception as e:
+            print(f"    ! Supabase Query Error: {e}")
+            return False
+
+    def log(self, level, message):
+        if not self.client: return
+        try:
+            self.client.table("logs").insert({"level": level, "message": message}).execute()
+        except:
+            pass # Silent fail for logs
 
     def mark_notified(self, post_id):
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute('UPDATE leads SET notified = 1 WHERE post_id = ?', (post_id,))
-        conn.commit()
-        conn.close()
-    
-    def log(self, level, message):
-        conn = self._get_connection()
-        cursor = conn.cursor()
-        cursor.execute('INSERT INTO logs (level, message) VALUES (?, ?)', (level, message))
-        conn.commit()
-        conn.close()
+        if not self.client: return
+        try:
+            self.client.table("leads").update({"notified": True}).eq("post_id", post_id).execute()
+        except Exception as e:
+             print(f"    ! Supabase Update Error: {e}")
 
 # Global instance
 db_manager = DatabaseManager()

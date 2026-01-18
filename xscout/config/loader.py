@@ -33,7 +33,9 @@ class ConfigLoader:
             'api_keys.linkedin.password': 'LINKEDIN_PASSWORD',
             'api_keys.callmebot.phone_number': 'WHATSAPP_PHONE',
             'api_keys.callmebot.api_key': 'WHATSAPP_KEY',
-            'app.scan_interval_minutes': 'SCAN_INTERVAL'
+            'app.scan_interval_minutes': 'SCAN_INTERVAL',
+            'supabase.url': 'SUPABASE_URL',
+            'supabase.key': 'SUPABASE_KEY'
         }
         
         if key in env_map:
