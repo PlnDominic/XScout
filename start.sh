@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Start the Scheduler Agent in the background
-echo "Starting XScout Agent..."
-python main.py &
+# Force Rebuild 2
 
-# Start the Streamlit Dashboard in the foreground
-echo "Starting Dashboard..."
+echo "[StartScript] Launching XScout Agent..."
+# Use unbuffered output (-u) so logs appear in Railway immediately
+python -u main.py &
+
+echo "[StartScript] Launching Streamlit..."
 streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0
