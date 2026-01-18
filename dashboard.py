@@ -3,426 +3,263 @@ import pandas as pd
 import sqlite3
 import os
 import json
-import urllib.parse
 from xscout.config.loader import config
 from xscout.database.manager import db_manager
 
-# --- Page Config ---
+# Page Config
 st.set_page_config(
     page_title="XScout",
     page_icon="🚀",
     layout="wide",
-    initial_sidebar_state="collapsed",
+    initial_sidebar_state="collapsed"
 )
 
-# --- Router Logic ---
-# Get current page from query params
-# Uses st.query_params (compatible with newer Streamlit versions)
-query_params = st.query_params
-current_page = query_params.get("page", "feed")
-current_lead_id = query_params.get("id", None)
+# --- 1. CONFIG & STATE ---
+# Get current view from query params (default to 'feed')
+if "view" not in st.query_params:
+    st.query_params["view"] = "feed"
+    
+current_view = st.query_params["view"]
 
-# --- Global Assets (Tailwind & Fonts) ---
-HEAD_HTML = """
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+# Load Data
+def load_leads():
+    if not db_manager.client: return pd.DataFrame()
+    try:
+        response = db_manager.client.table("leads").select("*").order("detected_at", desc=True).execute()
+        return pd.DataFrame(response.data) if response.data else pd.DataFrame()
+    except: return pd.DataFrame()
+
+# --- 2. GLOBAL STYLES & APP SHELL ---
+# Inject Tailwind, Fonts, and Reset CSS
+st.markdown("""
+<script src="https://cdn.tailwindcss.com"></script>
 <script>
     tailwind.config = {
         darkMode: "class",
         theme: {
             extend: {
-                colors: { "primary": "#136dec", "background-light": "#f6f7f8", "background-dark": "#101822" },
-                fontFamily: { "display": ["Inter"] },
-            },
-        },
+                colors: {
+                    "primary": "#136dec",
+                    "background-light": "#f6f7f8",
+                    "background-dark": "#101822",
+                },
+                fontFamily: { "display": ["Inter"] }
+            }
+        }
     }
 </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1" rel="stylesheet">
 <style>
-    body { font-family: 'Inter', sans-serif; background-color: #101822; color: white; -webkit-tap-highlight-color: transparent; }
-    /* Hide Streamlit elements */
+    /* Global Reset for Streamlit */
+    body { font-family: 'Inter', sans-serif; background-color: #101822; }
+    .stApp { background-color: #101822; color: white; }
+    header { visibility: hidden; }
+    div.block-container { padding-top: 0 !important; padding-bottom: 80px !important; max-width: 100% !important; padding-left: 0 !important; padding-right: 0 !important; }
+    
+    /* Navigation Active States */
+    .nav-item.active { color: #136dec; }
+    .nav-item.active span.material-symbols-outlined { font-variation-settings: 'FILL' 1; }
+    
+    /* Utility */
+    .ios-blur { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    
+    /* Hide Streamlit Elements */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .block-container { padding: 0 !important; max-width: 100% !important; }
-    [data-testid="stAppViewContainer"] { background-color: #101822; }
-    [data-testid="stHeader"] { display: none; }
-    .stApp { overflow-x: hidden; }
+    .stDeployButton {display:none;}
 </style>
-"""
+""", unsafe_allow_html=True)
 
-# --- Helper: Render Full HTML ---
-def render_page(html_content):
-    full_html = f"""
-    <!DOCTYPE html>
-    <html class="dark" lang="en">
-    <head>{HEAD_HTML}</head>
-    <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display">
-        {html_content}
-    </body>
-    </html>
-    """
-    st.markdown(full_html, unsafe_allow_html=True)
+# --- 3. VIEWS ---
 
-# --- Helper: Navigation Script ---
-def nav_script(target_page, params=""):
-    # JS to update query param and rely on Streamlit auto-reload (or force reload if needed)
-    return f"window.parent.location.assign('?page={target_page}{params}')"
-
-# --- View: Feed ---
-def lead_feed_view():
-    # Fetch Data
-    leads = []
-    if db_manager.client:
-        try:
-            response = db_manager.client.table("leads").select("*").order("detected_at", desc=True).limit(50).execute()
-            leads = response.data
-        except: pass
-
-    # Generate Cards HTML
-    cards_html = ""
-    for lead in leads:
-        intent_badge_color = "bg-primary/10 text-primary" if lead['intent_label'] == 'High' else "bg-slate-500/10 text-slate-500"
-        
-        # Safe string handling
-        post_text = lead.get('post_text', '')
-        # Basic XSS prevention isn't strictly necessary for internal tool but good practice
-        post_text = post_text.replace('"', '&quot;').replace('<', '&lt;').replace('>', '&gt;')
-        
-        cards_html += f"""
-        <!-- Lead Card -->
-        <div class="p-2 @container">
-            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden" onclick="{nav_script('details', f'&id={lead["post_id"]}')}" style="cursor: pointer;">
-                <div class="p-4 flex flex-col gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
-                                <span class="text-[10px] font-bold">{lead.get('platform', 'X')[0]}</span>
-                            </div>
-                            <div>
-                                <p class="text-slate-900 dark:text-white text-sm font-bold leading-none">{lead.get('username', 'Unknown')}</p>
-                                <p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">{lead.get('detected_at', '')[:16]}</p>
-                            </div>
-                        </div>
-                        <span class="px-2 py-1 rounded-full {intent_badge_color} text-[10px] font-bold uppercase tracking-wider">{lead.get('intent_label', 'Low')} Intent</span>
-                    </div>
-                    <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed line-clamp-3">
-                        {post_text}
-                    </p>
-                </div>
-            </div>
-        </div>
-        """
-
-    # Top Bar & Main Layout
-    MOCK_FEED_HTML = """
-    <!-- Mock Data (Empty State) -->
-    <div class="flex flex-col gap-1 p-2">
-        <!-- Lead Card 1: High Intent -->
-        <div class="p-2 @container">
-            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
-                <div class="p-4 flex flex-col gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
-                                <span class="text-[10px] font-bold">X</span>
-                            </div>
-                            <div>
-                                <p class="text-slate-900 dark:text-white text-sm font-bold leading-none">@dev_finder</p>
-                                <p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">2m ago • Twitter</p>
-                            </div>
-                        </div>
-                        <span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">High Intent</span>
-                    </div>
-                    <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
-                        Looking for a React dev to build a landing page for a new SaaS project. Needs to be familiar with Tailwind CSS and Framer Motion. 🚀
-                    </p>
-                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                         <div class="flex gap-4">
-                            <button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">share</span></button>
-                        </div>
-                        <button class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md">
-                            <span class="truncate">Save Lead</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Lead Card 2: Medium Intent -->
-        <div class="p-2 @container">
-            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
-                <div class="p-4 flex flex-col gap-3">
-                    <div class="flex justify-between items-start">
-                        <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center text-white">
-                                <span class="material-symbols-outlined text-sm">hub</span>
-                            </div>
-                            <div>
-                                <p class="text-slate-900 dark:text-white text-sm font-bold leading-none">John Doe</p>
-                                <p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">15m ago • LinkedIn</p>
-                            </div>
-                        </div>
-                        <span class="px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-bold uppercase tracking-wider">Medium Intent</span>
-                    </div>
-                    <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
-                        Does anyone know a good freelancer for a Shopify site migration? We are moving from Wix and need help with SEO preservation.
-                    </p>
-                </div>
-            </div>
-        </div>
-        
-         <!-- Automation Tip -->
-        <div class="p-2 @container">
-            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
-                 <div class="flex w-full grow flex-col items-stretch justify-center gap-1 p-4">
-                    <p class="text-primary text-[10px] font-bold uppercase tracking-widest">Automation Tip</p>
-                    <p class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Boost your outreach with AI</p>
-                    <p class="text-slate-500 dark:text-[#9da8b9] text-xs font-normal leading-normal">Generate personalized intros for LinkedIn leads automatically.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    """
-
-    html = f"""
-    <!-- Sticky Top Bar -->
-    <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-        <div class="flex items-center p-4 pb-2 justify-between">
+def render_feed():
+    df = load_leads()
+    
+    # Header
+    st.markdown("""
+    <header class="sticky top-0 z-50 bg-[#101822]/80 ios-blur border-b border-slate-800">
+        <div class="flex items-center p-4 pb-2 justify-between max-w-md mx-auto">
             <div class="flex items-center gap-2">
                 <div class="flex size-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-green-500">
                     <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1">check_circle</span>
                 </div>
-                <h2 class="text-slate-900 dark:text-white text-base font-bold leading-tight tracking-tight">System Status: Active</h2>
+                <h2 class="text-white text-base font-bold leading-tight">System Status: Active</h2>
             </div>
-            <div class="flex items-center justify-end">
-                <p class="text-slate-500 dark:text-[#9da8b9] text-xs font-medium uppercase tracking-wider">Syncing...</p>
-            </div>
+            <div class="text-[#9da8b9] text-xs font-medium uppercase tracking-wider">Syncing...</div>
         </div>
-        <!-- Segmented Control -->
-        <div class="flex px-4 py-3">
-            <div class="flex h-10 flex-1 items-center justify-center rounded-xl bg-slate-200 dark:bg-[#282f39] p-1">
-                <button class="flex h-full grow items-center justify-center rounded-lg bg-white dark:bg-[#111418] shadow-sm text-primary text-sm font-semibold transition-all">All</button>
-                <button class="flex h-full grow items-center justify-center rounded-lg text-slate-500 dark:text-[#9da8b9] text-sm font-semibold transition-all">X</button>
-                <button class="flex h-full grow items-center justify-center rounded-lg text-slate-500 dark:text-[#9da8b9] text-sm font-semibold transition-all">LinkedIn</button>
-            </div>
+        <div class="max-w-md mx-auto px-4 pb-3">
+             <p class="text-[#9da8b9] text-[11px]">Last sync: Just now • Leads found: %s</p>
         </div>
     </header>
-
-    <main class="max-w-md mx-auto pb-24">
-        {cards_html if cards_html else MOCK_FEED_HTML}
-    </main>
-
-    <!-- Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-6 py-3 pb-8">
-        <div class="flex justify-between items-center max-w-md mx-auto">
-            <button class="flex flex-col items-center gap-1 text-primary" onclick="{nav_script('feed')}">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">rss_feed</span>
-                <span class="text-[10px] font-bold">Feed</span>
-            </button>
-            <button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
-                <span class="material-symbols-outlined">bookmark</span>
-                <span class="text-[10px] font-medium">Saved</span>
-            </button>
-            <button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" onclick="{nav_script('analytics')}">
-                <span class="material-symbols-outlined">query_stats</span>
-                <span class="text-[10px] font-medium">Analytics</span>
-            </button>
-            <button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" onclick="{nav_script('settings')}">
-                <span class="material-symbols-outlined">settings</span>
-                <span class="text-[10px] font-medium">Settings</span>
-            </button>
-        </div>
-    </nav>
-    """
-    render_page(html)
-
-# --- View: Lead Details ---
-def lead_details_view(lead_id):
-    # Fetch Lead
-    lead = {}
-    if db_manager.client and lead_id:
-        try:
-            response = db_manager.client.table("leads").select("*").eq("post_id", lead_id).execute()
-            if response.data:
-                lead = response.data[0]
-        except: pass
+    """ % len(df), unsafe_allow_html=True)
     
-    if not lead:
-        st.error("Lead not found.")
-        return
-
-    # Extract Data
-    post_text = lead.get('post_text', '')
-    profile_url = lead.get('profile_url', '#')
-    contact_info = lead.get('contact_info', 'Not found')
-    score = lead.get('intent_score', 0)
+    # Main Content
+    st.markdown('<main class="max-w-md mx-auto pb-4 p-2 flex flex-col gap-1">', unsafe_allow_html=True)
     
-    html = f"""
-    <div class="relative flex h-auto min-h-screen w-full flex-col max-w-[480px] mx-auto bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden border-x border-gray-800">
-        <!-- TopAppBar -->
-        <div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-50">
-            <div class="text-white flex size-12 shrink-0 items-center cursor-pointer" onclick="{nav_script('feed')}">
-                <span class="material-symbols-outlined text-white">arrow_back_ios_new</span>
-            </div>
-            <h2 class="text-white text-lg font-bold leading-tight flex-1 text-center">Lead Details</h2>
-            <div class="flex w-12 items-center justify-end"></div>
-        </div>
+    if df.empty:
+        st.markdown('<div class="p-4 text-center text-gray-500">No leads found yet.</div>', unsafe_allow_html=True)
+    else:
+        for idx, row in df.iterrows():
+            # Platform Icon
+            if "Twitter" in str(row['platform']) or "X" in str(row['platform']):
+                icon_bg, icon_txt, icon_char = "bg-slate-900", "text-white", "X"
+            else:
+                icon_bg, icon_txt, icon_char = "bg-[#0077b5]", "text-white", "in"
 
-        <!-- BodyText -->
-        <div class="px-4 pt-6">
-            <div class="bg-white/5 rounded-xl p-4 border border-white/10">
-                <p class="text-white text-base font-normal leading-relaxed">{post_text}</p>
-                <div class="mt-4 flex items-center justify-between text-xs text-[#9da8b9]">
-                    <span>{lead.get('detected_at', '')[:16]}</span>
-                    <a href="{profile_url}" target="_blank" class="flex items-center gap-1 text-primary cursor-pointer">
-                        <span class="material-symbols-outlined text-xs">link</span> View original post
-                    </a>
-                </div>
-            </div>
-        </div>
+            # Intent Badge
+            intent = row.get('intent_label', 'Low')
+            if intent == 'High':
+                badge_cls = "bg-blue-500/10 text-blue-500"
+            elif intent == 'Medium':
+                badge_cls = "bg-orange-500/10 text-orange-500"
+            else:
+                badge_cls = "bg-slate-500/10 text-slate-500"
+            
+            # Safe strings
+            username = row.get('username') or 'Unknown'
+            detected_at = str(row.get('detected_at', ''))[:16]
+            post_text = row.get('post_text', '')
 
-        <!-- Insights -->
-        <div class="px-4 pt-6">
-            <div class="bg-[#1a1a1a] rounded-xl p-4 border border-white/5 space-y-4">
-                <div class="flex items-center gap-4">
-                    <div class="relative size-16 flex items-center justify-center">
-                        <span class="text-2xl font-bold">{score}/10</span>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-white">Confidence Score</p>
-                        <p class="text-xs text-[#9da8b9]">Based on AI analysis of intent.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Contact Info -->
-        <div class="px-4 pt-8 pb-32">
-            <h2 class="text-white text-[18px] font-bold leading-tight mb-3">Inferred Contact Info</h2>
-            <div class="flex flex-col gap-3">
-                <div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-[#9da8b9]">contact_mail</span>
-                        <div>
-                            <p class="text-xs text-[#9da8b9]">Contact</p>
-                            <p class="text-sm font-medium">{contact_info}</p>
+            card_html = f"""
+            <div class="p-2">
+                <div class="flex flex-col rounded-xl bg-[#1c2027] border border-slate-800/50 overflow-hidden shadow-sm">
+                    <div class="p-4 flex flex-col gap-3">
+                        <!-- Header -->
+                        <div class="flex justify-between items-start">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 rounded-full {icon_bg} flex items-center justify-center {icon_txt}">
+                                    <span class="text-[10px] font-bold">{icon_char}</span>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm font-bold leading-none">{username}</p>
+                                    <p class="text-[#9da8b9] text-[11px] mt-1">{detected_at} • {row['platform']}</p>
+                                </div>
+                            </div>
+                            <span class="px-2 py-1 rounded-full {badge_cls} text-[10px] font-bold uppercase tracking-wider">{intent} Intent</span>
+                        </div>
+                        <!-- Content -->
+                        <p class="text-slate-200 text-base font-medium leading-relaxed">
+                            {post_text}
+                        </p>
+                        <!-- Actions -->
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+                            <div class="flex gap-4">
+                                <button class="text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-lg">share</span></button>
+                                <button class="text-slate-500 hover:text-red-500"><span class="material-symbols-outlined text-lg">block</span></button>
+                            </div>
+                            <a href="{row['profile_url']}" target="_blank" class="flex min-w-[100px] items-center justify-center rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md active:scale-95 transition-transform">
+                                View Profile
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Actions -->
-        <div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-background-dark/80 backdrop-blur-xl border-t border-white/10 p-4 pb-8 flex flex-col gap-3">
-            <a href="{profile_url}" target="_blank" class="w-full h-12 bg-primary text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-primary/20 cursor-pointer text-decoration-none">
-                <span class="material-symbols-outlined">launch</span> Open on {lead.get('platform', 'Platform')}
-            </a>
-        </div>
-    </div>
-    """
-    render_page(html)
+            """
+            st.markdown(card_html, unsafe_allow_html=True)
+            
+    st.markdown('</main>', unsafe_allow_html=True)
 
-# --- View: Analytics ---
-def analytics_view():
-    total_leads = 0
-    if db_manager.client:
-        try:
-             count = db_manager.client.table("leads").select("*", count="exact").execute()
-             total_leads = count.count
-        except: pass
-
-    html = f"""
-    <div class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+def render_settings():
+    # Header
+    st.markdown("""
+    <div class="sticky top-0 z-50 bg-[#101822]/80 backdrop-blur-md border-b border-slate-800">
         <div class="flex items-center p-4 justify-between max-w-md mx-auto">
-            <div class="flex items-center gap-3">
-                <span class="material-symbols-outlined text-primary">analytics</span>
-                <h2 class="text-lg font-bold">System Analytics</h2>
-            </div>
+            <a href="?view=feed" target="_self" class="text-primary flex size-10 items-center justify-start"><span class="material-symbols-outlined">arrow_back_ios</span></a>
+            <h2 class="text-lg font-bold flex-1 text-center text-white">Automation Settings</h2>
+            <div class="flex size-10 items-center justify-end"><p class="text-primary text-base font-bold">Save</p></div>
         </div>
     </div>
-    <main class="max-w-md mx-auto pb-20 pt-4">
-        <div class="p-4 grid grid-cols-2 gap-3">
-            <div class="flex flex-col gap-2 rounded-xl p-4 border border-slate-800 bg-slate-900/50">
-                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">API Health</p>
-                <p class="text-2xl font-bold leading-tight">Stable</p>
-                <div class="flex items-center gap-1 text-green-500"><span class="material-symbols-outlined text-[14px]">check_circle</span> 99.9%</div>
-            </div>
-            <div class="flex flex-col gap-2 rounded-xl p-4 border border-slate-800 bg-slate-900/50">
-                <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Total Leads</p>
-                <p class="text-2xl font-bold leading-tight">{total_leads}</p>
-            </div>
-        </div>
-    </main>
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-6 py-3 pb-8">
-        <div class="flex justify-between items-center max-w-md mx-auto">
-            <button class="flex flex-col items-center gap-1 text-slate-400" onclick="{nav_script('feed')}"><span class="material-symbols-outlined">rss_feed</span><span class="text-[10px]">Feed</span></button>
-            <button class="flex flex-col items-center gap-1 text-primary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">query_stats</span><span class="text-[10px]">Analytics</span></button>
-            <button class="flex flex-col items-center gap-1 text-slate-400" onclick="{nav_script('settings')}"><span class="material-symbols-outlined">settings</span><span class="text-[10px]">Settings</span></button>
-        </div>
-    </nav>
-    """
-    render_page(html)
-
-# --- View: Settings ---
-def settings_view():
-    keywords = config.get("keywords", [])
+    """, unsafe_allow_html=True)
     
-    # We render the VISUALS in HTML, but we might rely on Streamlit for the actual logic? 
-    # For now, let's keep it read-only/display-only given the prompt constraints, OR use a simple Streamlit section within it.
-    
-    html = f"""
-    <div class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
-        <div class="flex items-center p-4 justify-between max-w-md mx-auto">
-            <div class="text-primary flex size-10 items-center justify-start cursor-pointer" onclick="{nav_script('feed')}"><span class="material-symbols-outlined">arrow_back_ios</span></div>
-            <h2 class="text-lg font-bold flex-1 text-center">Settings</h2>
-            <div class="size-10"></div>
-        </div>
-    </div>
-    <main class="max-w-md mx-auto pb-24 px-4 pt-6">
-        <h2 class="text-[22px] font-bold">Keywords</h2>
-        <p class="text-slate-400 text-sm pb-4">Current active search terms.</p>
-        <div class="flex gap-2 flex-wrap pb-4">
-            {''.join([f'<div class="flex h-9 items-center rounded-lg bg-[#282f39] px-3"><p class="text-sm font-medium">{k}</p></div>' for k in keywords])}
-        </div>
+    # Content Container
+    with st.container():
+        st.markdown('<div class="max-w-md mx-auto px-4 pb-24 space-y-4">', unsafe_allow_html=True)
         
-        <div class="h-4"></div>
-        <h2 class="text-[22px] font-bold">Platforms</h2>
-        <div class="space-y-3 pt-4">
-            <div class="flex items-center justify-between p-4 bg-[#1c2027] rounded-xl border border-slate-800">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined">brand_family</span>
-                    <div><p class="font-semibold">LinkedIn</p><p class="text-xs text-slate-500">Active</p></div>
-                </div>
-                <div class="text-green-500">ON</div>
+        # Keywords
+        st.markdown("""
+        <div>
+            <h2 class="text-[22px] font-bold pt-6 text-white">Keywords</h2>
+            <p class="text-slate-400 text-sm pb-4">Phrases to scan for.</p>
+            <div class="flex gap-2 flex-wrap pb-4">
+        """, unsafe_allow_html=True)
+        
+        # Keyword Tags
+        keywords = config.get("keywords", [])
+        for kw in keywords:
+            st.markdown(f"""
+            <div class="flex h-9 items-center gap-x-2 rounded-lg bg-[#282f39] pl-3 pr-2 text-white text-sm font-medium">
+                {kw} <span class="material-symbols-outlined text-sm opacity-60">close</span>
             </div>
-            <div class="flex items-center justify-between p-4 bg-[#1c2027] rounded-xl border border-slate-800">
-                <div class="flex items-center gap-3">
-                    <span class="material-symbols-outlined">crossword</span>
-                    <div><p class="font-semibold">X (Twitter)</p><p class="text-xs text-slate-500">Active</p></div>
-                </div>
-                <div class="text-green-500">ON</div>
-            </div>
-        </div>
-    </main>
-    <nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-6 py-3 pb-8">
-        <div class="flex justify-between items-center max-w-md mx-auto">
-            <button class="flex flex-col items-center gap-1 text-slate-400" onclick="{nav_script('feed')}"><span class="material-symbols-outlined">rss_feed</span><span class="text-[10px]">Feed</span></button>
-            <button class="flex flex-col items-center gap-1 text-slate-400" onclick="{nav_script('analytics')}"><span class="material-symbols-outlined">query_stats</span><span class="text-[10px]">Analytics</span></button>
-            <button class="flex flex-col items-center gap-1 text-primary"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">settings</span><span class="text-[10px]">Settings</span></button>
-        </div>
-    </nav>
-    """
-    render_page(html)
+            """, unsafe_allow_html=True)
+            
+        st.markdown("</div></div>", unsafe_allow_html=True)
+        
+        # Config Form (Hybrid)
+        st.markdown('<h2 class="text-[22px] font-bold pt-2 text-white">Rule Config</h2>', unsafe_allow_html=True)
+        
+        control_status = {"running": True} # Default
+        if os.path.exists("xscout/control.json"):
+             with open("xscout/control.json", "r") as f: control_status = json.load(f)
 
-# --- Main Dispatcher ---
-if current_page == "feed":
-    lead_feed_view()
-elif current_page == "details" and current_lead_id:
-    lead_details_view(current_lead_id)
-elif current_page == "analytics":
-    analytics_view()
-elif current_page == "settings":
-    settings_view()
-else:
-    lead_feed_view()
+        enable = st.toggle("Enable Automation", value=control_status.get("running", True))
+        if enable != control_status.get("running", True):
+             control_status["running"] = enable
+             with open("xscout/control.json", "w") as f: json.dump(control_status, f)
+             st.rerun()
+
+        scan_int = st.slider("Scan Interval (Minutes)", 15, 120, int(config.get("app.scan_interval_minutes", 60)))
+        min_score = st.slider("Intent Threshold", 1, 10, int(config.get("app.min_intent_score", 7)))
+        
+        st.markdown("""
+        <div class="mt-8">
+            <button class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20">
+                Apply Automation Rules
+            </button>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
+
+def render_analytics():
+    df = load_leads()
+    st.markdown('<br><div class="max-w-md mx-auto p-4 text-white"><h2 class="text-2xl font-bold mb-4">Analytics</h2>', unsafe_allow_html=True)
+    if not df.empty:
+        col1, col2 = st.columns(2)
+        with col1: st.metric("Total Leads", len(df))
+        with col2: st.metric("High Intent", len(df[df['intent_label']=="High"]))
+        
+        st.markdown('<h3 class="text-lg font-bold mt-6 mb-2">Platform Distribution</h3>', unsafe_allow_html=True)
+        st.bar_chart(df['platform'].value_counts())
+    else:
+        st.info("No data yet.")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# --- 4. ROUTER ---
+if current_view == "feed":
+    render_feed()
+elif current_view == "settings":
+    render_settings()
+elif current_view == "analytics":
+    render_analytics()
+
+# --- 5. GLOBAL BOTTOM NAV ---
+nav_html = f"""
+<nav class="fixed bottom-0 left-0 right-0 bg-[#101822]/90 ios-blur border-t border-slate-800 px-6 py-3 pb-8 z-50">
+    <div class="flex justify-between items-center max-w-md mx-auto">
+        <a href="?view=feed" target="_self" class="nav-item flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors {'active' if current_view == 'feed' else ''}">
+            <span class="material-symbols-outlined">rss_feed</span>
+            <span class="text-[10px] font-bold">Feed</span>
+        </a>
+        <a href="?view=analytics" target="_self" class="nav-item flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors {'active' if current_view == 'analytics' else ''}">
+            <span class="material-symbols-outlined">query_stats</span>
+            <span class="text-[10px] font-medium">Analytics</span>
+        </a>
+        <a href="?view=settings" target="_self" class="nav-item flex flex-col items-center gap-1 text-slate-500 hover:text-white transition-colors {'active' if current_view == 'settings' else ''}">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="text-[10px] font-medium">Settings</span>
+        </a>
+    </div>
+</nav>
+"""
+st.markdown(nav_html, unsafe_allow_html=True)
