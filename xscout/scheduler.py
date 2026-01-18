@@ -88,17 +88,51 @@ class XScoutScheduler:
                     else:
                         db_manager.log("ERROR", f"Failed to notify for {post['post_id']}")
 
+    def get_control_status(self):
+        try:
+            import json
+            import os
+            if os.path.exists("xscout/control.json"):
+                with open("xscout/control.json", "r") as f:
+                    return json.load(f)
+        except:
+            pass
+        return {"running": True, "trigger_now": False}
+
+    def reset_trigger(self):
+        try:
+            import json
+            status = self.get_control_status()
+            status["trigger_now"] = False
+            with open("xscout/control.json", "w") as f:
+                json.dump(status, f)
+        except:
+            pass
+
     def start(self):
         interval = config.get("app.scan_interval_minutes", 15)
         print(f"[*] XScout Agent started. Scanning every {interval} minutes.")
         print(f"[*] Dry-run mode: {self.dry_run}")
         
-        # Run immediately once
+        # Run immediately once on startup
         self.scan()
         
         # Schedule
         schedule.every(interval).minutes.do(self.scan)
         
+        print("[*] Waiting for schedule or manual triggers...")
         while True:
-            schedule.run_pending()
+            # Check Control File
+            status = self.get_control_status()
+            
+            # Manual Trigger
+            if status.get("trigger_now"):
+                print("[!] Manual trigger detected. Starting scan...")
+                self.reset_trigger()
+                self.scan()
+            
+            # Scheduled Run (only if running is True)
+            if status.get("running", True):
+                schedule.run_pending()
+            
             time.sleep(1)

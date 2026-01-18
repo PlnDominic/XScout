@@ -43,6 +43,41 @@ else:
     # Stats
     df = load_leads()
 
+    # Control Panel
+    st.sidebar.header("🕹️ Control Panel")
+    
+    import json
+    CONTROL_FILE = "xscout/control.json"
+    
+    def get_status():
+        if os.path.exists(CONTROL_FILE):
+            with open(CONTROL_FILE, 'r') as f:
+                return json.load(f)
+        return {"running": True, "trigger_now": False}
+
+    def set_status(running=None, trigger=None):
+        status = get_status()
+        if running is not None: status["running"] = running
+        if trigger is not None: status["trigger_now"] = trigger
+        with open(CONTROL_FILE, 'w') as f:
+            json.dump(status, f)
+            
+    current_status = get_status()
+    
+    # Run Now Button
+    if st.sidebar.button("⚡ Run Scan Now"):
+        set_status(trigger=True)
+        st.sidebar.success("Scan triggered!")
+        
+    # Pause/Resume Toggle
+    is_running = st.sidebar.toggle("Auto-Scanning Active", value=current_status.get("running", True))
+    if is_running != current_status.get("running", True):
+        set_status(running=is_running)
+        st.rerun()
+
+    if not is_running:
+        st.sidebar.warning("Scanning Paused ⏸️")
+
     if not df.empty:
         col1, col2, col3 = st.columns(3)
         col1.metric("Total Leads", len(df))
