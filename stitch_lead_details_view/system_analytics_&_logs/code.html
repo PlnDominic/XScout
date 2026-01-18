@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>System Analytics &amp; Logs</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen">
+<!-- Top Navigation Bar -->
+<div class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center p-4 justify-between max-w-md mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">analytics</span>
+<h2 class="text-lg font-bold leading-tight tracking-tight">System Analytics</h2>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">SYNCED: 12:45:01</span>
+<button class="flex items-center justify-center rounded-full w-10 h-10 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-primary">sync</span>
+</button>
+</div>
+</div>
+</div>
+<main class="max-w-md mx-auto pb-20">
+<!-- Health & Stats Grid -->
+<div class="p-4 grid grid-cols-2 gap-3">
+<div class="flex flex-col gap-2 rounded-xl p-4 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+<div class="flex items-center justify-between">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">API Health</p>
+<span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+</div>
+<p class="text-2xl font-bold leading-tight">Stable</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-green-500">check_circle</span>
+<p class="text-green-500 text-xs font-medium">99.9% uptime</p>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-4 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">DB Storage</p>
+<p class="text-2xl font-bold leading-tight">1.2<span class="text-sm font-normal text-slate-500">/5GB</span></p>
+<div class="w-full bg-slate-200 dark:bg-slate-800 h-1.5 rounded-full mt-1">
+<div class="bg-primary h-1.5 rounded-full" style="width: 24%"></div>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-[10px]">24% capacity used</p>
+</div>
+</div>
+<!-- Charts Section -->
+<div class="px-4 py-2">
+<div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-4">
+<div class="flex justify-between items-start mb-4">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Daily Lead Discovery</p>
+<p class="text-3xl font-bold tracking-tight">142 <span class="text-sm font-normal text-slate-500">Leads Found</span></p>
+</div>
+<div class="bg-green-500/10 text-green-500 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                        +12%
+                    </div>
+</div>
+<!-- SVG Chart -->
+<div class="relative h-[160px] w-full mt-4">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 150">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#136dec" stop-opacity="0.3"></stop>
+<stop offset="100%" stop-color="#136dec" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Area Fill -->
+<path d="M0,120 C50,110 80,40 120,50 C160,60 200,130 240,110 C280,90 320,20 360,30 C380,35 400,60 400,60 L400,150 L0,150 Z" fill="url(#chartGradient)"></path>
+<!-- Line -->
+<path d="M0,120 C50,110 80,40 120,50 C160,60 200,130 240,110 C280,90 320,20 360,30 C380,35 400,60 400,60" fill="none" stroke="#136dec" stroke-linecap="round" stroke-width="3"></path>
+</svg>
+<div class="flex justify-between mt-2 px-1">
+<span class="text-[10px] font-bold text-slate-400">MON</span>
+<span class="text-[10px] font-bold text-slate-400">TUE</span>
+<span class="text-[10px] font-bold text-slate-400">WED</span>
+<span class="text-[10px] font-bold text-slate-400 text-primary">THU</span>
+<span class="text-[10px] font-bold text-slate-400">FRI</span>
+<span class="text-[10px] font-bold text-slate-400">SAT</span>
+<span class="text-[10px] font-bold text-slate-400">SUN</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Section Header for Logs -->
+<div class="px-4 pt-6 pb-2 flex items-center justify-between">
+<h3 class="text-lg font-bold leading-tight tracking-tight">System Activity Logs</h3>
+<div class="flex gap-2">
+<button class="text-[10px] font-bold px-2 py-1 rounded bg-primary/20 text-primary border border-primary/30 uppercase tracking-tighter">Live</button>
+</div>
+</div>
+<!-- Activity Logs List -->
+<div class="px-4 space-y-3">
+<!-- Log Entry 1 -->
+<div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
+<span class="text-[11px] font-mono text-slate-400 uppercase tracking-widest">Crawl Completed</span>
+</div>
+<span class="text-[10px] font-mono text-slate-500">14:02:45</span>
+</div>
+<p class="text-sm font-medium mb-3">Found <span class="text-primary font-bold">14 new leads</span> across X and LinkedIn.</p>
+<div class="flex gap-2">
+<div class="bg-primary/10 border border-primary/20 px-2 py-1 rounded text-[10px] font-bold text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">star</span>
+                        2 HIGH INTENT
+                    </div>
+<div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-[10px] font-bold text-slate-500">#WEB-DEV</div>
+</div>
+</div>
+<!-- Log Entry 2 -->
+<div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">search</span>
+<span class="text-[11px] font-mono text-slate-400 uppercase tracking-widest">LinkedIn Scraper</span>
+</div>
+<span class="text-[10px] font-mono text-slate-500">12:15:10</span>
+</div>
+<p class="text-sm font-medium text-slate-500 italic">No new leads matching keywords: "react freelance", "nextjs architect".</p>
+</div>
+<!-- Log Entry 3 -->
+<div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-orange-500 text-sm">warning</span>
+<span class="text-[11px] font-mono text-slate-400 uppercase tracking-widest">X API Notice</span>
+</div>
+<span class="text-[10px] font-mono text-slate-500">09:30:22</span>
+</div>
+<p class="text-sm font-medium">Rate limit reached for endpoint <code class="bg-slate-100 dark:bg-slate-800 px-1 rounded text-primary">/search/recent</code>. Throttling for 15m.</p>
+</div>
+<!-- Log Entry 4 -->
+<div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40">
+<div class="flex justify-between items-start mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-500 text-sm">auto_awesome</span>
+<span class="text-[11px] font-mono text-slate-400 uppercase tracking-widest">Daily Summary</span>
+</div>
+<span class="text-[10px] font-mono text-slate-500">08:00:00</span>
+</div>
+<p class="text-sm font-medium mb-3">Daily batch processing finished. 42 total leads synced to CRM.</p>
+<div class="flex gap-2">
+<div class="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-[10px] font-bold text-slate-500 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px]">hub</span>
+                        CRM SYNC: SUCCESS
+                    </div>
+</div>
+</div>
+</div>
+<div class="p-4 text-center">
+<button class="text-xs font-bold text-primary hover:underline">View All Historical Logs</button>
+</div>
+</main>
+<!-- Bottom Tab Bar (iOS style) -->
+<div class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 pb-8 pt-2 px-6">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">Dashboard</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">monitoring</span>
+<span class="text-[10px] font-medium">Analytics</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">settings_ethernet</span>
+<span class="text-[10px] font-medium">Pipelines</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-slate-400">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</div>
+</div>
+</div>
+</body></html>

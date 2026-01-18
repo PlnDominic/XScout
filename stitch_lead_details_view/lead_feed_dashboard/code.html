@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lead Feed Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-blur {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<!-- Sticky Top Bar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 ios-blur border-b border-slate-200 dark:border-slate-800">
+<div class="flex items-center p-4 pb-2 justify-between">
+<div class="flex items-center gap-2">
+<div class="flex size-6 shrink-0 items-center justify-center rounded-full bg-green-500/20 text-green-500">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1">check_circle</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-base font-bold leading-tight tracking-tight">System Status: Active</h2>
+</div>
+<div class="flex items-center justify-end">
+<p class="text-slate-500 dark:text-[#9da8b9] text-xs font-medium uppercase tracking-wider">Syncing...</p>
+</div>
+</div>
+<!-- Meta Text -->
+<p class="text-slate-500 dark:text-[#9da8b9] text-[11px] font-normal leading-normal pb-3 pt-0 px-4">
+            Last sync: 1 minute ago • 42 leads found today
+        </p>
+<!-- Segmented Control (iOS Style) -->
+<div class="flex px-4 py-3">
+<div class="flex h-10 flex-1 items-center justify-center rounded-xl bg-slate-200 dark:bg-[#282f39] p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-[#111418] has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 dark:text-[#9da8b9] text-sm font-semibold transition-all">
+<span class="truncate">All</span>
+<input checked="" class="invisible w-0" name="platform-filter" type="radio" value="All"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-[#111418] has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 dark:text-[#9da8b9] text-sm font-semibold transition-all">
+<span class="truncate">X</span>
+<input class="invisible w-0" name="platform-filter" type="radio" value="X"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-lg px-2 has-[:checked]:bg-white dark:has-[:checked]:bg-[#111418] has-[:checked]:shadow-sm has-[:checked]:text-primary text-slate-500 dark:text-[#9da8b9] text-sm font-semibold transition-all">
+<span class="truncate">LinkedIn</span>
+<input class="invisible w-0" name="platform-filter" type="radio" value="LinkedIn"/>
+</label>
+</div>
+</div>
+</header>
+<main class="max-w-md mx-auto pb-24">
+<!-- Lead Feed Section -->
+<div class="flex flex-col gap-1 p-2">
+<!-- Lead Card 1: High Intent -->
+<div class="p-2 @container">
+<div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+<div class="p-4 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
+<span class="text-[10px] font-bold">X</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-sm font-bold leading-none">@dev_finder</p>
+<p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">2m ago • Twitter</p>
+</div>
+</div>
+<span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">High Intent</span>
+</div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
+                            Looking for a React dev to build a landing page for a new SaaS project. Needs to be familiar with Tailwind CSS and Framer Motion. 🚀
+                        </p>
+<div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+<div class="flex gap-4">
+<button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">share</span>
+</button>
+<button class="text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">block</span>
+</button>
+</div>
+<button class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md active:scale-95 transition-transform">
+<span class="truncate">Save Lead</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Lead Card 2: Medium Intent -->
+<div class="p-2 @container">
+<div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+<div class="p-4 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-sm">hub</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-sm font-bold leading-none">John Doe</p>
+<p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">15m ago • LinkedIn</p>
+</div>
+</div>
+<span class="px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 dark:text-orange-400 text-[10px] font-bold uppercase tracking-wider">Medium Intent</span>
+</div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
+                            Does anyone know a good freelancer for a Shopify site migration? We are moving from Wix and need help with SEO preservation.
+                        </p>
+<div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+<div class="flex gap-4">
+<button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">share</span>
+</button>
+<button class="text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">block</span>
+</button>
+</div>
+<button class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md active:scale-95 transition-transform">
+<span class="truncate">Save Lead</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Image/Content Card 3: Contextual Ad or Feature -->
+<div class="p-2 @container">
+<div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+<div class="w-full bg-center bg-no-repeat aspect-[16/7] bg-cover" data-alt="Abstract blue glowing digital nodes and connections" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBS4vPzjXjVyfpVhViiCKxGkIHVbX4FlZHq4DgxbBkFA8SJTLplm8-U4ft5tB-pu73MXswxJrg9704rkc1QRFBLMmLb9lvt4p8VCOnusdsCWI50mGkfVJdwDIE_8aRvqWfPRAasRV8guHPNgOLRZ5kivJj2EVrn8s8mulCNMiPQ7BlpUB0qpHbUEIHGA3evHIkc34UYunvNc2yuXA_lFIrUgNSjQkZmtNrgTnYcgoI_f_Pz2QM5Dx7ZnL6O51D-9o2LsYZ9-rr0yZQ");'>
+</div>
+<div class="flex w-full grow flex-col items-stretch justify-center gap-1 p-4">
+<p class="text-primary text-[10px] font-bold uppercase tracking-widest">Automation Tip</p>
+<p class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Boost your outreach with AI</p>
+<div class="flex items-center justify-between mt-2">
+<p class="text-slate-500 dark:text-[#9da8b9] text-xs font-normal leading-normal">Generate personalized intros for LinkedIn leads automatically.</p>
+<button class="flex size-10 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800 text-primary transition-colors active:bg-slate-200">
+<span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Lead Card 4: Low Intent -->
+<div class="p-2 @container">
+<div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+<div class="p-4 flex flex-col gap-3">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
+<span class="text-[10px] font-bold">X</span>
+</div>
+<div>
+<p class="text-slate-900 dark:text-white text-sm font-bold leading-none">Sarah Chen</p>
+<p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">45m ago • Twitter</p>
+</div>
+</div>
+<span class="px-2 py-1 rounded-full bg-slate-500/10 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Low Intent</span>
+</div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
+                            Web development is getting so complicated these days. React, Next.js, Remix... where do I even start?
+                        </p>
+<div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+<div class="flex gap-4">
+<button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-lg">share</span>
+</button>
+<button class="text-slate-400 dark:text-slate-500 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">block</span>
+</button>
+</div>
+<button class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white text-sm font-semibold transition-transform active:scale-95">
+<span class="truncate">Save Lead</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Navigation Bar (iOS style bottom) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-background-dark/80 ios-blur border-t border-slate-200 dark:border-slate-800 px-6 py-3 pb-8">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<button class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">rss_feed</span>
+<span class="text-[10px] font-bold">Feed</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">bookmark</span>
+<span class="text-[10px] font-medium">Saved</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="text-[10px] font-medium">Analytics</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</div>
+</nav>
+</body></html>

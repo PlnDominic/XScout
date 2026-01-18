@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lead Details View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#136dec",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101822",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-white">
+<div class="relative flex h-auto min-h-screen w-full flex-col max-w-[480px] mx-auto bg-background-light dark:bg-background-dark group/design-root overflow-x-hidden border-x border-gray-800">
+<!-- TopAppBar -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-50">
+<div class="text-white flex size-12 shrink-0 items-center cursor-pointer" data-icon="ArrowLeft" data-size="24px" data-weight="regular">
+<span class="material-symbols-outlined text-white">arrow_back_ios_new</span>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Lead Details</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 bg-transparent text-white gap-2 text-base font-bold leading-normal tracking-[0.015em] min-w-0 p-0">
+<span class="material-symbols-outlined text-white">share</span>
+</button>
+</div>
+</div>
+<!-- ProfileHeader -->
+<div class="flex p-4 @container border-b border-gray-800/50">
+<div class="flex w-full flex-col gap-4 @[520px]:flex-row @[520px]:justify-between @[520px]:items-center">
+<div class="flex gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-20 w-20 ring-2 ring-primary/20" data-alt="professional headshot of a developer" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC6uYuC0ilAXxB_ybvHdmYYMayeP6tc1yEfl6wW7c_QuYFdLYIIEeLYcNuBKJgV2Ehf70SiPQISY3PROYw4rBoMYlENJL5CaCSB3rGGmCmNu8WDtsEuLLbdQWhkSf8d_x6rI89BLdZ4oXjtdeTzAy33QWSS2fl1vfPSTFxiDStmeWf_igzQlO8-O2a97wqGUKbIOpVoaAldPln9t78Q1uay2n7Lj_CJhJVfQrgNZZPtMunhUeZuoE78VhlcKqCaq0858JMdSZomp0s");'></div>
+<div class="flex flex-col justify-center">
+<div class="flex items-center gap-2">
+<p class="text-white text-[20px] font-bold leading-tight tracking-[-0.015em]">Alex Rivera</p>
+<span class="material-symbols-outlined text-primary text-sm">verified</span>
+</div>
+<p class="text-[#9da8b9] text-sm font-normal leading-normal">@arivera_dev • X (Twitter)</p>
+<p class="text-[#9da8b9] text-xs font-normal leading-normal mt-1 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">schedule</span> Discovered 2 hours ago
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- BodyText / Social Post -->
+<div class="px-4 pt-6">
+<div class="bg-white/5 rounded-xl p-4 border border-white/10">
+<p class="text-white text-base font-normal leading-relaxed">
+                    We are looking for a <span class="text-primary font-bold">senior React developer</span> to help us scale our fintech platform. Must have experience with <span class="text-primary font-bold">Node.js</span> and <span class="text-primary font-bold">AWS</span>. <span class="bg-primary/20 text-primary px-1 rounded">Immediate start</span> preferred! #hiring #webdev
+                </p>
+<div class="mt-4 flex items-center justify-between text-xs text-[#9da8b9]">
+<span>1:42 PM · Oct 24, 2023</span>
+<span class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-xs">link</span> View original post
+                    </span>
+</div>
+</div>
+</div>
+<!-- SectionHeader: Lead Insights -->
+<div class="px-4 pt-6 pb-2">
+<div class="flex items-center justify-between">
+<h2 class="text-white text-[18px] font-bold leading-tight tracking-[-0.015em]">Lead Insights</h2>
+<div class="flex items-center gap-1 bg-green-500/10 text-green-500 px-3 py-1 rounded-full text-xs font-bold">
+<span class="material-symbols-outlined text-xs">bolt</span> High Intent
+                </div>
+</div>
+</div>
+<!-- Scoring Breakdown -->
+<div class="px-4">
+<div class="bg-[#1a1a1a] rounded-xl p-4 border border-white/5 space-y-4">
+<div class="flex items-center gap-4">
+<div class="relative size-16 flex items-center justify-center">
+<svg class="size-full" viewbox="0 0 36 36">
+<circle class="stroke-current text-gray-700" cx="18" cy="18" fill="none" r="16" stroke-width="2"></circle>
+<circle class="stroke-current text-primary" cx="18" cy="18" fill="none" r="16" stroke-dasharray="85 100" stroke-linecap="round" stroke-width="2"></circle>
+</svg>
+<span class="absolute text-sm font-bold">92%</span>
+</div>
+<div>
+<p class="text-sm font-medium text-white">Confidence Score</p>
+<p class="text-xs text-[#9da8b9]">Based on semantic analysis of post urgency and technical stack requirements.</p>
+</div>
+</div>
+<div class="space-y-2 pt-2 border-t border-white/5">
+<div class="flex items-center gap-2 text-sm text-[#9da8b9]">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+<span>Urgent hiring keywords detected</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#9da8b9]">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+<span>Direct budget/equity mention</span>
+</div>
+<div class="flex items-center gap-2 text-sm text-[#9da8b9]">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+<span>Technical stack match: 100%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Chips: Matched Keywords -->
+<div class="px-4 pt-6">
+<p class="text-xs font-bold text-[#9da8b9] uppercase tracking-wider mb-2">Matched Stack</p>
+<div class="flex gap-2 flex-wrap">
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/10 border border-primary/20 pl-2 pr-4">
+<span class="material-symbols-outlined text-primary text-[18px]">code</span>
+<p class="text-white text-sm font-medium leading-normal">React</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/10 border border-primary/20 pl-2 pr-4">
+<span class="material-symbols-outlined text-primary text-[18px]">javascript</span>
+<p class="text-white text-sm font-medium leading-normal">Node.js</p>
+</div>
+<div class="flex h-8 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-primary/10 border border-primary/20 pl-2 pr-4">
+<span class="material-symbols-outlined text-primary text-[18px]">cloud</span>
+<p class="text-white text-sm font-medium leading-normal">AWS</p>
+</div>
+</div>
+</div>
+<!-- Contact Info Section -->
+<div class="px-4 pt-8 pb-32">
+<h2 class="text-white text-[18px] font-bold leading-tight tracking-[-0.015em] mb-3">Inferred Contact Info</h2>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#9da8b9]">mail</span>
+<div>
+<p class="text-xs text-[#9da8b9]">Email</p>
+<p class="text-sm font-medium">a.rivera@hey.com</p>
+</div>
+</div>
+<button class="text-primary"><span class="material-symbols-outlined text-xl">content_copy</span></button>
+</div>
+<div class="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-white/10">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[#9da8b9]">language</span>
+<div>
+<p class="text-xs text-[#9da8b9]">Portfolio</p>
+<p class="text-sm font-medium">arivera.dev</p>
+</div>
+</div>
+<button class="text-primary"><span class="material-symbols-outlined text-xl">open_in_new</span></button>
+</div>
+</div>
+</div>
+<!-- Floating Bottom Actions -->
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-background-dark/80 backdrop-blur-xl border-t border-white/10 p-4 pb-8 flex flex-col gap-3">
+<button class="w-full h-12 bg-primary text-white rounded-xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">send</span>
+                Mark as Contacted
+            </button>
+<button class="w-full h-12 bg-white/5 text-white border border-white/10 rounded-xl font-bold text-base flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">launch</span>
+                Open in X (Twitter)
+            </button>
+</div>
+</div>
+</body></html>
