@@ -1,8 +1,10 @@
 import streamlit as st
 import pandas as pd
 import sqlite3
+import sqlite3
 import os
 from xscout.config.loader import config
+from xscout.database.manager import db_manager # Forces DB creation
 
 # Page Config
 st.set_page_config(
