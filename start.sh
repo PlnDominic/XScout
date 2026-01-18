@@ -10,4 +10,4 @@ echo "[StartScript] Waiting for agent to initialize..."
 sleep 5
 
 echo "[StartScript] Launching Streamlit..."
-streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0
+streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0 --server.enableCORS=false --server.enableXsrfProtection=false
