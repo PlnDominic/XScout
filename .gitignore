@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Database
+*.db
+xscout/xscout.db
+
+# Secrets (CRITICAL)
+xscout/config/config.yaml
+
+# OS
+.DS_Store

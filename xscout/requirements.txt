@@ -1,0 +1,8 @@
+requests
+pyyaml
+schedule
+tweepy
+linkedin-api
+spacy
+streamlit
+pandas

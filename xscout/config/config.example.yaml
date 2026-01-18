@@ -1,0 +1,18 @@
+app:
+  name: "XScout"
+  scan_interval_minutes: 15
+  min_intent_score: 7
+
+keywords:
+  - "need a website"
+  - "hire web developer"
+
+api_keys:
+  twitter:
+    bearer_token: "YOUR_TWITTER_BEARER_TOKEN"
+  linkedin:
+    username: "YOUR_LINKEDIN_EMAIL"
+    password: "YOUR_LINKEDIN_PASSWORD"
+  callmebot:
+    phone_number: "YOUR_PHONE_NUMBER"
+    api_key: "YOUR_API_KEY"
