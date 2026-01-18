@@ -115,6 +115,76 @@ def lead_feed_view():
         """
 
     # Top Bar & Main Layout
+    MOCK_FEED_HTML = """
+    <!-- Mock Data (Empty State) -->
+    <div class="flex flex-col gap-1 p-2">
+        <!-- Lead Card 1: High Intent -->
+        <div class="p-2 @container">
+            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+                <div class="p-4 flex flex-col gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
+                                <span class="text-[10px] font-bold">X</span>
+                            </div>
+                            <div>
+                                <p class="text-slate-900 dark:text-white text-sm font-bold leading-none">@dev_finder</p>
+                                <p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">2m ago • Twitter</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">High Intent</span>
+                    </div>
+                    <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
+                        Looking for a React dev to build a landing page for a new SaaS project. Needs to be familiar with Tailwind CSS and Framer Motion. 🚀
+                    </p>
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                         <div class="flex gap-4">
+                            <button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">share</span></button>
+                        </div>
+                        <button class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md">
+                            <span class="truncate">Save Lead</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lead Card 2: Medium Intent -->
+        <div class="p-2 @container">
+            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+                <div class="p-4 flex flex-col gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center text-white">
+                                <span class="material-symbols-outlined text-sm">hub</span>
+                            </div>
+                            <div>
+                                <p class="text-slate-900 dark:text-white text-sm font-bold leading-none">John Doe</p>
+                                <p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">15m ago • LinkedIn</p>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-bold uppercase tracking-wider">Medium Intent</span>
+                    </div>
+                    <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
+                        Does anyone know a good freelancer for a Shopify site migration? We are moving from Wix and need help with SEO preservation.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+         <!-- Automation Tip -->
+        <div class="p-2 @container">
+            <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
+                 <div class="flex w-full grow flex-col items-stretch justify-center gap-1 p-4">
+                    <p class="text-primary text-[10px] font-bold uppercase tracking-widest">Automation Tip</p>
+                    <p class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Boost your outreach with AI</p>
+                    <p class="text-slate-500 dark:text-[#9da8b9] text-xs font-normal leading-normal">Generate personalized intros for LinkedIn leads automatically.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    """
+
     html = f"""
     <!-- Sticky Top Bar -->
     <header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
@@ -140,75 +210,7 @@ def lead_feed_view():
     </header>
 
     <main class="max-w-md mx-auto pb-24">
-        {cards_html if cards_html else """
-        <!-- Mock Data (Empty State) -->
-        <div class="flex flex-col gap-1 p-2">
-            <!-- Lead Card 1: High Intent -->
-            <div class="p-2 @container">
-                <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
-                    <div class="p-4 flex flex-col gap-3">
-                        <div class="flex justify-between items-start">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white">
-                                    <span class="text-[10px] font-bold">X</span>
-                                </div>
-                                <div>
-                                    <p class="text-slate-900 dark:text-white text-sm font-bold leading-none">@dev_finder</p>
-                                    <p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">2m ago • Twitter</p>
-                                </div>
-                            </div>
-                            <span class="px-2 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">High Intent</span>
-                        </div>
-                        <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
-                            Looking for a React dev to build a landing page for a new SaaS project. Needs to be familiar with Tailwind CSS and Framer Motion. 🚀
-                        </p>
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
-                             <div class="flex gap-4">
-                                <button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors"><span class="material-symbols-outlined text-lg">share</span></button>
-                            </div>
-                            <button class="flex min-w-[100px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-9 px-4 bg-primary text-white text-sm font-semibold shadow-md">
-                                <span class="truncate">Save Lead</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lead Card 2: Medium Intent -->
-            <div class="p-2 @container">
-                <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
-                    <div class="p-4 flex flex-col gap-3">
-                        <div class="flex justify-between items-start">
-                            <div class="flex items-center gap-2">
-                                <div class="w-8 h-8 rounded-full bg-[#0077b5] flex items-center justify-center text-white">
-                                    <span class="material-symbols-outlined text-sm">hub</span>
-                                </div>
-                                <div>
-                                    <p class="text-slate-900 dark:text-white text-sm font-bold leading-none">John Doe</p>
-                                    <p class="text-slate-500 dark:text-[#9da8b9] text-[11px] mt-1">15m ago • LinkedIn</p>
-                                </div>
-                            </div>
-                            <span class="px-2 py-1 rounded-full bg-orange-500/10 text-orange-500 text-[10px] font-bold uppercase tracking-wider">Medium Intent</span>
-                        </div>
-                        <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-relaxed">
-                            Does anyone know a good freelancer for a Shopify site migration? We are moving from Wix and need help with SEO preservation.
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-             <!-- Automation Tip -->
-            <div class="p-2 @container">
-                <div class="flex flex-col items-stretch justify-start rounded-xl shadow-sm bg-white dark:bg-[#1c2027] border border-slate-100 dark:border-slate-800/50 overflow-hidden">
-                     <div class="flex w-full grow flex-col items-stretch justify-center gap-1 p-4">
-                        <p class="text-primary text-[10px] font-bold uppercase tracking-widest">Automation Tip</p>
-                        <p class="text-slate-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Boost your outreach with AI</p>
-                        <p class="text-slate-500 dark:text-[#9da8b9] text-xs font-normal leading-normal">Generate personalized intros for LinkedIn leads automatically.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        """}
+        {cards_html if cards_html else MOCK_FEED_HTML}
     </main>
 
     <!-- Navigation Bar -->
